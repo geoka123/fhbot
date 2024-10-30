@@ -79,4 +79,4 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-        return Response(str(llm_chain.run(question)))
+        return Response(str(llm_chain.run(question, context)))
