@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from ..models import *
 from .serializers import *
 
@@ -58,6 +59,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
     vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
 
+    @csrf_exempt
     @action(detail=False, methods=['post'], url_path='answer-on-text')
     def answer_based_on_text_provided(self, request):
         """Receives botId and input and query and returns answer based ONLY on input text provided"""
