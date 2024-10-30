@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import requests
 from rest_framework.views import APIView
 from ..models import *
 from .serializers import *
@@ -9,12 +10,11 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma
-from langchain.chains.question_answering import load_qa_chain
-from langchain_community.llms import OpenAI
 from django.conf import settings
 import tempfile
+
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain import PromptTemplate, LLMChain
 
 
 class IndexExampleView(viewsets.ViewSet):
@@ -53,28 +53,42 @@ class FileUploadView(viewsets.ModelViewSet):
             return Response({"success": "Yes"}, status=status.HTTP_201_CREATED)
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
-class RespondBasedOnTextProvided(APIView):
-    embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
-    vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
-
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        """Receives botId and input and query and returns answer based ONLY on input text provided"""
+class RespondBasedOnTextProvided(viewsets.ModelViewSet):
+    @api_view(['POST'])
+    def answer_based_on_text_provided(request):
+        """Receives input and query and returns answer based ONLY on input text provided."""
         data = request.data
-        input_text = data['input']
-        query = data['query']
+        context = data.get('input')
+        question = data.get('query')
 
-        if not input_text or not query:
-            return Response({"error": "Both 'input_text' and 'query' are required"}, status=400)
-        
-        docs = [input_text]
-        self.vector_store.add_texts(docs)
+        if not context or not question:
+            return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
-        llm = OpenAI(api_key=settings.OPENAI_API_KEY)
-        qa_chain = load_qa_chain(llm, chain_type="stuff")
+        repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token="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")
 
-        relevant_docs = self.vector_store.similarity_search(query, k=5)
+        prompt_template = PromptTemplate(
+            input_variables=["context", "question"],
+            template="""
+            You are an intelligent assistant. Given the following context, answer the question.
 
-        answer = qa_chain.run(input_documents=relevant_docs, question=query)
-        
-        return Response({"answer": answer})
+            Context: {context}
+
+            Question: {question}
+
+            Answer:
+            """
+        )
+
+        generated_prompt = prompt_template.format(context=context, question=question)
+
+        llm_chain = LLMChain(llm=llm, prompt=prompt_template)
+
+        input_data = {
+            "context": f"{context}",
+            "question": f"{question}"
+        }
+
+        answer = llm_chain.invoke(input_data)
+
+        return Response(str(answer))
