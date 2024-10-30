@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from langchain_openai import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain.chains.question_answering import load_qa_chain
 from langchain_community.llms import OpenAI
 from django.conf import settings
