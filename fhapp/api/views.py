@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from ..models import *
 from .serializers import *
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
@@ -58,8 +58,8 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
     vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
 
-    @api_view(['POST'])
-    def answer_based_on_text_provided(request, self):
+    @action(detail=False, methods=['post'], url_path='answer-on-text')
+    def answer_based_on_text_provided(self, request):
         """Receives botId and input and query and returns answer based ONLY on input text provided"""
         data = request.data
         input_text = data['input']
