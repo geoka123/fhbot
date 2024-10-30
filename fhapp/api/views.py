@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import requests
 from rest_framework.views import APIView
 from ..models import *
 from .serializers import *
@@ -9,12 +10,11 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
 
-from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma
-from langchain.chains.question_answering import load_qa_chain
-from langchain_community.llms import OpenAI
 from django.conf import settings
 import tempfile
+
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain import PromptTemplate, LLMChain
 
 
 class IndexExampleView(viewsets.ViewSet):
@@ -53,28 +53,31 @@ class FileUploadView(viewsets.ModelViewSet):
             return Response({"success": "Yes"}, status=status.HTTP_201_CREATED)
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
-class RespondBasedOnTextProvided(APIView):
-    embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
-    vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
-
+class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        """Receives botId and input and query and returns answer based ONLY on input text provided"""
+    @action(detail=False, methods=['post'], url_path='answer-on-text')
+    def answer_based_on_text_provided(self, request):
+        """Receives context and question and returns answer based ONLY on input text provided."""
         data = request.data
-        input_text = data['input']
-        query = data['query']
+        context = data.get('input')
+        question = data.get('query')
 
-        if not input_text or not query:
-            return Response({"error": "Both 'input_text' and 'query' are required"}, status=400)
+        if not context or not question:
+            return Response({"error": "Both 'input' and 'query' are required"}, status=400)
+
+        repo_id = "nomic-ai/gpt4all-j"
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token=settings.HUGGINGFACE_SECRET_KEY)
+
+        template = """Context: {context}
         
-        docs = [input_text]
-        self.vector_store.add_texts(docs)
+        Question: {question}
 
-        llm = OpenAI(api_key=settings.OPENAI_API_KEY)
-        qa_chain = load_qa_chain(llm, chain_type="stuff")
+        Answer:
 
-        relevant_docs = self.vector_store.similarity_search(query, k=5)
+        """
 
-        answer = qa_chain.run(input_documents=relevant_docs, question=query)
-        
-        return Response({"answer": answer})
+        prompt = PromptTemplate(template=template, input_variables=["context", "question"])
+
+        llm_chain = LLMChain(llm=llm, prompt=prompt)
+
+        return Response(str(llm_chain.run(question)))
