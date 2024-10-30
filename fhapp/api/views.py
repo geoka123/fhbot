@@ -67,7 +67,7 @@ class RespondBasedOnTextProvided(APIView):
         if not input_text or not query:
             return Response({"error": "Both 'input_text' and 'query' are required"}, status=400)
         
-        docs = [{"text": input_text}]
+        docs = [input_text]
         self.vector_store.add_texts(docs)
 
         llm = OpenAI(api_key=settings.OPENAI_API_KEY)
