@@ -14,8 +14,7 @@ from django.conf import settings
 import tempfile
 
 from langchain_huggingface import HuggingFaceEndpoint
-from langchain_core import PromptTemplate
-from langchain.chains import LLMChain
+from langchain import PromptTemplate, LLMChain
 
 
 class IndexExampleView(viewsets.ViewSet):
@@ -82,6 +81,6 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-        answer = llm_chain.run(context=context, question=question)
+        answer = llm_chain.invoke(context=context, question=question)
 
         return Response(str(answer))
