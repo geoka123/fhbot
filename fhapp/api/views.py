@@ -65,7 +65,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token=settings.HUGGINGFACE_SECRET_KEY)
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token="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")
 
         template = """Context: {context}
         
