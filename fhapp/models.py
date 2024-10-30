@@ -23,3 +23,6 @@ class Bot(models.Model):
                 else:
                     raise ValueError("Bot with such id already exists")
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return str(self.botName)
