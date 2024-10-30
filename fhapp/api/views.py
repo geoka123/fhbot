@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 from ..models import *
 from .serializers import *
 
@@ -52,16 +53,12 @@ class FileUploadView(viewsets.ModelViewSet):
             return Response({"success": "Yes"}, status=status.HTTP_201_CREATED)
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
-class RespondBasedOnTextProvided(viewsets.ModelViewSet):
-    queryset = Bot.objects.all()
-    serializer_class = BotModelSerializer
-
+class RespondBasedOnTextProvided(APIView):
     embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
     vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
 
     @csrf_exempt
-    @action(detail=False, methods=['post'], url_path='answer-on-text')
-    def answer_based_on_text_provided(self, request):
+    def post(self, request, *args, **kwargs):
         """Receives botId and input and query and returns answer based ONLY on input text provided"""
         data = request.data
         input_text = data['input']
