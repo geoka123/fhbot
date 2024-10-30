@@ -14,7 +14,8 @@ from django.conf import settings
 import tempfile
 
 from langchain_huggingface import HuggingFaceEndpoint
-from langchain import PromptTemplate, LLMChain
+from langchain_core import PromptTemplate
+from langchain.chains import LLMChain
 
 
 class IndexExampleView(viewsets.ViewSet):
