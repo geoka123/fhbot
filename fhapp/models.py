@@ -8,9 +8,19 @@ class Bot(models.Model):
     botName = models.CharField(max_length=100, unique=True)
     botAPIkey = models.CharField(max_length=250)
     botId = models.IntegerField(null=True, blank=True)
+    botLLMModel = models.CharField(max_length=100)
 
     def get_bot_id(self):
         return self.botId
+
+    def get_bot_name(self):
+        return str(self.botName)
+    
+    def get_bot_api(self):
+        return str(self.botAPIkey)
+    
+    def get_bot_llm(self):
+        return str(self.botLLMModel)
 
     def save(self, *args, **kwargs):
         if not self.pk:
