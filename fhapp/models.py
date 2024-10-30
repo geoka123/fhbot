@@ -5,7 +5,7 @@ import random
 # Create your models here.
 
 class Bot(models.Model):
-    botName = models.CharField(max_length=100)
+    botName = models.CharField(max_length=100, unique=True)
     botAPIkey = models.CharField(max_length=250)
     botId = models.IntegerField(null=True, blank=True)
 
@@ -13,18 +13,13 @@ class Bot(models.Model):
         return self.botId
 
     def save(self, *args, **kwargs):
-        if self.botId == None:
+        if not self.pk:
             while True:
-                bid = random.randint(1, 10000)
-                id_exists = False
+                rand_val = random.randint(500, 11000)
 
-                all_bots = Bot.objects.all()
-                for bot in all_bots:
-                    if bot.get_bot_id() == bid:
-                        id_exists = True
-                        break
-                
-                if not id_exists:
+                if not Bot.objects.filter(botId=rand_val).exists():
+                    self.botId = rand_val
                     break
-                        
-        super().save()
+                else:
+                    raise ValueError("Bot with such id already exists")
+        super().save(*args, **kwargs)
