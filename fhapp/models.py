@@ -9,6 +9,7 @@ class Bot(models.Model):
     botAPIkey = models.CharField(max_length=250)
     botId = models.IntegerField(null=True, blank=True)
     botLLMModel = models.CharField(max_length=100)
+    fileTest = models.FileField(verbose_name="test_file")
 
     def get_bot_id(self):
         return self.botId
@@ -33,6 +34,6 @@ class Bot(models.Model):
                 else:
                     raise ValueError("Bot with such id already exists")
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return str(self.botName)
