@@ -130,3 +130,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'fhapp.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+OPENAI_API_KEY = "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"

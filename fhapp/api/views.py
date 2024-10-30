@@ -7,6 +7,13 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
 
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chains.question_answering import load_qa_chain
+from langchain.llms import OpenAI
+from django.conf import settings
+import tempfile
+
 
 class IndexExampleView(viewsets.ViewSet):
     @api_view(['GET'])
@@ -43,3 +50,32 @@ class FileUploadView(viewsets.ModelViewSet):
             serializer.save()
             return Response({"success": "Yes"}, status=status.HTTP_201_CREATED)
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
+
+class RespondBasedOnTextProvided(viewsets.ModelViewSet):
+    queryset = Bot.objects.all()
+    serializer_class = BotModelSerializer
+
+    embeddings = OpenAIEmbeddings(openai_api_key=settings.OPENAI_API_KEY)
+    vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
+
+    @api_view(['POST'])
+    def answer_based_on_text_provided(self, request):
+        """Receives botId and input and query and returns answer based ONLY on input text provided"""
+        data = request.data
+        input_text = data['input']
+        query = data['query']
+
+        if not input_text or not query:
+            return Response({"error": "Both 'input_text' and 'query' are required"}, status=400)
+        
+        docs = [{"text": input_text}]
+        self.vector_store.add_texts(docs)
+
+        llm = OpenAI(api_key=settings.OPENAI_API_KEY)
+        qa_chain = load_qa_chain(llm, chain_type="stuff")
+
+        relevant_docs = self.vector_store.similarity_search(query, k=5)
+
+        answer = qa_chain.run(input_documents=relevant_docs, question=query)
+        
+        return Response({"answer": answer})
