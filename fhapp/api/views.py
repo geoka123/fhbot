@@ -59,7 +59,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     vector_store = Chroma(embedding_function=embeddings, persist_directory=None)
 
     @api_view(['POST'])
-    def answer_based_on_text_provided(self, request):
+    def answer_based_on_text_provided(request, self):
         """Receives botId and input and query and returns answer based ONLY on input text provided"""
         data = request.data
         input_text = data['input']
