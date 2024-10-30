@@ -1,6 +1,6 @@
 from .views import *
 from django.urls import path
 
-url_patterns = [
+urlpatterns = [
     path('hello/', IndexExampleView.index_hello)
 ]
