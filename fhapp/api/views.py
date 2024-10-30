@@ -64,7 +64,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         if not context or not question:
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
-        repo_id = "nomic-ai/gpt4all-j"
+        repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
         llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token=settings.HUGGINGFACE_SECRET_KEY)
 
         template = """Context: {context}
