@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 import random
 
@@ -9,7 +10,6 @@ class Bot(models.Model):
     botAPIkey = models.CharField(max_length=250)
     botId = models.IntegerField(null=True, blank=True)
     botLLMModel = models.CharField(max_length=100)
-    fileTest = models.FileField(verbose_name="test_file")
 
     def get_bot_id(self):
         return self.botId
@@ -37,3 +37,27 @@ class Bot(models.Model):
 
     def __str__(self):
         return str(self.botName)
+    
+class User(AbstractUser):
+    connectedBot = models.ForeignKey(Bot, on_delete=models.SET_NULL, null=True, blank=True)
+
+class DataSource(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name="data_sources")
+    file = models.FileField(upload_to="data_sources/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.bot.botName} - Data Source ({self.uploaded_at.date()})"
+
+
+class QuestionHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="question_history")
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name="question_history")
+    question_text = models.TextField()
+    response_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    visualization_type = models.CharField(max_length=50, blank=True, null=True)  # e.g., 'chart', 'table'
+    data_used = models.ForeignKey(DataSource, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Q: {self.question_text[:50]}... - Bot: {self.bot.botName}"
