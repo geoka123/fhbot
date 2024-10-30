@@ -67,20 +67,28 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
         llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token="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")
 
-        template = """Context: {context}
-        
-        Question: {question}
+        prompt_template = PromptTemplate(
+            input_variables=["context", "question"],
+            template="""
+            You are an intelligent assistant. Given the following context, answer the question.
 
-        Answer:
+            Context: {context}
 
-        """
+            Question: {question}
 
-        prompt = PromptTemplate(template=template, input_variables=["context", "question"])
+            Answer:
+            """
+        )
 
-        generated_prompt = prompt.format(context=context, question=question)
+        generated_prompt = prompt_template.format(context=context, question=question)
 
-        llm_chain = LLMChain(llm=llm, prompt=prompt)
+        llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-        answer = llm_chain.invoke(input=context, question=question)
+        input_data = {
+            "context": f"{context}",
+            "question": f"{question}"
+        }
+
+        answer = llm_chain.invoke(input_data)
 
         return Response(str(answer))
