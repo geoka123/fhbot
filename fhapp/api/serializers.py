@@ -11,7 +11,7 @@ class FileUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataSource
-        fields = ['file']
+        fields = ['file', 'botId']
 
     def create(self, validated_data):
         botId = validated_data.pop('botId')
