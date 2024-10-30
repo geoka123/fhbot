@@ -77,6 +77,10 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         prompt = PromptTemplate(template=template, input_variables=["context", "question"])
 
+        generated_prompt = prompt.format(context=context, question=question)
+
         llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-        return Response(str(llm_chain.run(question, context)))
+        answer = llm_chain.run(context=context, question=question)
+
+        return Response(str(answer))
