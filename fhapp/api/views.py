@@ -80,7 +80,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             data.to_csv(output_csv, index=False)
             agent = create_csv_agent(llm, 
                                    '/home/ec2-user/fhbot/cur_csvfile.csv', 
-               verbose=True)
+               verbose=True, allow_dangerous_code=True)
             answer = agent.run(question)
 
             return JsonResponse({"text": answer})
