@@ -64,13 +64,14 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=1500, temperature=0.7, token="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")
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2000, temperature=0.7, token="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")
 
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. If you do not understand the following question, ask for a rephrase. If you do not know the answer say you do not know it and do not make up one.
-
+            You are an intelligent assistant. Please provide a detailed and comprehensive answer. 
+            If you do not understand the question, ask for a rephrase. If you do not know the answer, 
+            say that you do not know it and do not make up an answer.
             Question: {question}
 
             Answer:
