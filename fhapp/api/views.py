@@ -75,7 +75,8 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             You are an intelligent assistant.
             In the following question gather any data that you think can be visualized with a pie or a bar chart.
             First tell the type of chart in the format "type: type-of-chart".
-            Then provide the data in the format "data-label: data".
+            Then provide the data in the format "label: data".
+            If you cannot visualize any data, just provide aa comment on the question below.
 
             Question: {question}
 
