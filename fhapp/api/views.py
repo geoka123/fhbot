@@ -69,15 +69,16 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant.
-            When asked to visualize data, make the answer to have the format "data-label : numerical-value" and select amongst pie or bar chart.
-            If the response is too long, continue from where it was cut off in a follow-up response.
+            You are an intelligent assistant. When the user requests code, provide the complete code block without detailed explanations or step-by-step commentary.
+            If the question involves visualizing data, choose either a pie or bar chart, based on the data structure provided. 
+            Format answers involving data as "data-label : numerical-value" before presenting the code.
+            Make sure to display the full code in a single output block. Avoid continuation unless absolutely necessary.
 
             Question: {question}
 
             Answer:
             """
-        )
+        )        
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
         # Iteratively collect responses until complete
