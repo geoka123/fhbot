@@ -54,7 +54,7 @@ class FileUploadView(viewsets.ModelViewSet):
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
 class RespondBasedOnTextProvided(viewsets.ModelViewSet):
-    @api_view(['POST'])
+    @api_view(['OPTIONS'])
     def answer_based_on_text_provided(request):
         """Receives input and query and returns answer based ONLY on input text provided."""
         data = request.data
