@@ -49,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'fhbackend.urls'
@@ -129,11 +130,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'fhapp.User'
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+ALLOWED_HOSTS=['*']
 
-CORS_ALLOW_HEADERS = ["content-type", "authorization"]
-
-CORS_ALLOW_METHODS = ["GET", "POST", "OPTIONS"]
+CORS_ORIGIN_ALLOW_ALL = True
 
 OPENAI_API_KEY = "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"
 
