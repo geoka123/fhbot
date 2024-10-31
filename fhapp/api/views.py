@@ -86,7 +86,9 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             input_data = {
                 "question": f"{question} {complete_answer}" if complete_answer else question
             }
-            partial_answer = llm_chain.invoke(input_data)
+            result = llm_chain.invoke(input_data)
+            partial_answer = result["text"]  # Access the answer text from the dictionary
+            
             complete_answer += partial_answer
 
             if "continue" not in partial_answer.lower():
