@@ -69,8 +69,8 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. When providing code examples, include the complete code in one response without breaking it down into steps.
-            Make sure the answer contains the entire code block if requested and do not cut it off or explain it unless asked.
+            You are an intelligent assistant.
+            When asked to visualize data, make the answer to have the format "\{data-label\} : \{numerical-value\}" and select amongst pie or bar chart.
             If the response is too long, continue from where it was cut off in a follow-up response.
 
             Question: {question}
