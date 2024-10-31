@@ -69,7 +69,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. Please provide a detailed and comprehensive answer. 
+            You are an intelligent assistant. 
             If the response is too long, continue from where it was cut off in a follow-up response.
 
             Question: {question}
