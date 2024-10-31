@@ -58,21 +58,18 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     def answer_based_on_text_provided(request):
         """Receives input and query and returns answer based ONLY on input text provided."""
         data = request.data
-        context = data.get('input')
-        question = data.get('query')
+        question = data.get('input')
 
-        if not context or not question:
+        if not question:
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
         llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=128, temperature=0.7, token="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")
 
         prompt_template = PromptTemplate(
-            input_variables=["context", "question"],
+            input_variables=["question"],
             template="""
             You are an intelligent assistant. Given the following context, answer the question.
-
-            Context: {context}
 
             Question: {question}
 
@@ -80,12 +77,11 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             """
         )
 
-        generated_prompt = prompt_template.format(context=context, question=question)
+        generated_prompt = prompt_template.format(question=question)
 
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
         input_data = {
-            "context": f"{context}",
             "question": f"{question}"
         }
 
