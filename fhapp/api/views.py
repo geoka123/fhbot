@@ -87,4 +87,4 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         answer = llm_chain.invoke(input_data)
 
-        return Response(str(answer))
+        return JsonResponse(answer)
