@@ -18,6 +18,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 import tempfile
 import logging
 import pandas as pd
+from langchain_openai import OpenAI
 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain import PromptTemplate, LLMChain
@@ -78,7 +79,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         if context_file == "1":
             data = pd.read_excel(DataSource.objects.latest('uploaded_at').file, engine='openpyxl')
             data.to_csv(output_csv, index=False)
-            agent = create_csv_agent(llm, output_csv, verbose=True, allow_dangerous_code=True)
+            agent = create_csv_agent(OpenAI(), output_csv, verbose=True, allow_dangerous_code=True)
             answer = agent.invoke(question)
             return JsonResponse({"text": answer})
 
