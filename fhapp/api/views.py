@@ -72,8 +72,10 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. Please answer the question below in detail.
-            Only when the user asks specifically for data visualizations or chart generation select a suitable chart format (e.g., pie or bar) and use the format "data-label : numerical-value" when applicable. 
+            You are an intelligent assistant.
+            In the following question gather any data that you think can be visualized with a pie or a bar chart.
+            First tell the type of chart in the format "type: type-of-chart".
+            Then provide the data in the format "label: numeric-data".
 
             Question: {question}
 
