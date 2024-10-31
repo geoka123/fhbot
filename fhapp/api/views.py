@@ -69,7 +69,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. Given the following context, answer the question.
+            You are an intelligent assistant. If you do not understand the following question, ask for a rephrase. If you do not know the answer say you do not know it and do not make up one.
 
             Question: {question}
 
