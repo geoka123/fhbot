@@ -12,10 +12,13 @@ from rest_framework import status
 
 from django.conf import settings
 import tempfile
+import logging
 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain import PromptTemplate, LLMChain
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class IndexExampleView(viewsets.ViewSet):
     @api_view(['GET'])
@@ -64,35 +67,44 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2500, temperature=1.5, token="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")
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2500, temperature=0.7, token="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")
 
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. When the user requests code, provide the complete code block without detailed explanations or step-by-step commentary.
-            If the question involves visualizing data or generating charts choose either a pie or bar chart, based on the data structure provided. 
-            Format answers involving data as "data-label : numerical-value" before presenting the code.
-            Make sure to display the full code in a single output block. Avoid continuation unless absolutely necessary.
+            You are an intelligent assistant.
+            When asked to visualize data, provide a formatted response with "data-label : numerical-value" and suggest pie or bar charts as appropriate.
+            If the response is too long, continue from where it was cut off in a follow-up response.
 
             Question: {question}
 
             Answer:
             """
-        )        
+        )
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-        # Iteratively collect responses until complete
+        # Attempt to get a non-blank response with a retry mechanism
         complete_answer = ""
-        while True:
-            input_data = {
-                "question": f"{question} {complete_answer}" if complete_answer else question
-            }
-            result = llm_chain.invoke(input_data)
-            partial_answer = result["text"]  # Access the answer text from the dictionary
-            
-            complete_answer += partial_answer
+        retries = 3
+        attempt = 0
 
-            if "continue" not in partial_answer.lower():
-                break  # Break the loop if the response is complete
+        while attempt < retries:
+            input_data = {"question": f"{question} {complete_answer}" if complete_answer else question}
+            result = llm_chain.invoke(input_data)
+
+            # Check for a blank response and retry if necessary
+            partial_answer = result.get("text", "").strip()
+            if partial_answer:
+                complete_answer += partial_answer
+                if "continue" not in partial_answer.lower():
+                    break  # Exit loop if response is complete
+            else:
+                logger.warning("Received a blank response, retrying...")
+                attempt += 1
+        
+        # Final check if no valid response was obtained
+        if not complete_answer:
+            logger.error("Failed to obtain a non-blank response after retries.")
+            return JsonResponse({"error": "The assistant failed to provide a response. Please try again later."}, status=500)
 
         return JsonResponse({"question": question, "answer": complete_answer})
