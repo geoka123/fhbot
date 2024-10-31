@@ -64,13 +64,14 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=3000, temperature=0.7, token="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")
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2500, temperature=0.7, token="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")
 
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
             You are an intelligent assistant. When providing code examples, include the complete code in one response without breaking it down into steps.
             Make sure the answer contains the entire code block if requested and do not cut it off or explain it unless asked.
+            If the response is too long, continue from where it was cut off in a follow-up response.
 
             Question: {question}
 
