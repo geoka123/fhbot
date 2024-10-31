@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.conf import settings
-from langchain.agents import create_csv_agent
+from langchain_experimental.agents import create_csv_agent
 import openpyxl
 from langchain.document_loaders.csv_loader import CSVLoader
 
