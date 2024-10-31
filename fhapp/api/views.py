@@ -72,10 +72,11 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant.
-            In the following question gather any data that you think can be visualized with a pie or a bar chart.
-            First tell the type of chart in the format "type: type-of-chart".
-            Then provide the data in the format "data-name: data-value".
+            You are a knowledgeable assistant that provides concise, accurate, and well-formatted answers.
+
+            - When asked to visualize data, respond in a clear format: "data-label: numerical-value" for data points, and suggest either a pie chart or bar chart based on the question’s context.
+            - If code is required, output the full code in Python using matplotlib without extra commentary.
+            - If the response is long, continue in a follow-up response to ensure completeness.
 
             Question: {question}
 
