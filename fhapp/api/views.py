@@ -90,7 +90,6 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             template="""
             You are a knowledgeable assistant that provides concise, accurate, and well-formatted answers.
 
-            - When asked to visualize data, respond in a clear format: "data-label: numerical-value" for data points, and suggest either a pie chart or bar chart based on the question’s context.
             - If code is required, output the full code in Python using matplotlib without extra commentary.
             - If the response is long, continue in a follow-up response to ensure completeness.
 
