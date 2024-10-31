@@ -71,7 +71,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         context = ""
         output_csv = r'/home/ec2-user/fhbot/cur_csvfile.csv'
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=1.0, max_new_tokens=2048, model_kwargs={"max_length": 2048, "token": "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"})
+        llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=1.0, max_new_tokens=2048, model_kwargs={"token": "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"})
 
         if not question:
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
