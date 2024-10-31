@@ -69,15 +69,14 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant. 
-            If the response is too long, continue from where it was cut off in a follow-up response.
+            You are an intelligent assistant. When providing code examples, include the complete code in one response without breaking it down into steps.
+            Make sure the answer contains the entire code block if requested and do not cut it off or explain it unless asked.
 
             Question: {question}
 
             Answer:
             """
         )
-
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
         # Iteratively collect responses until complete
