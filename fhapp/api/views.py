@@ -64,28 +64,32 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2000, temperature=0.7, token="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")
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=2500, temperature=0.7, token="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")
 
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
             You are an intelligent assistant. Please provide a detailed and comprehensive answer. 
-            If you do not understand the question, ask for a rephrase. If you do not know the answer, 
-            say that you do not know it and do not make up an answer.
+            If the response is too long, continue from where it was cut off in a follow-up response.
+
             Question: {question}
 
             Answer:
             """
         )
 
-        generated_prompt = prompt_template.format(question=question)
-
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-        input_data = {
-            "question": f"{question}"
-        }
+        # Iteratively collect responses until complete
+        complete_answer = ""
+        while True:
+            input_data = {
+                "question": f"{question} {complete_answer}" if complete_answer else question
+            }
+            partial_answer = llm_chain.invoke(input_data)
+            complete_answer += partial_answer
 
-        answer = llm_chain.invoke(input_data)
+            if "continue" not in partial_answer.lower():
+                break  # Break the loop if the response is complete
 
-        return JsonResponse(answer)
+        return JsonResponse({"question": question, "answer": complete_answer})
