@@ -78,11 +78,8 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         if context_file == "1":
             data = pd.read_excel(DataSource.objects.latest('uploaded_at').file, engine='openpyxl')
             data.to_csv(output_csv, index=False)
-            agent = create_csv_agent(llm, 
-                                   '/home/ec2-user/fhbot/cur_csvfile.csv', 
-               verbose=True, allow_dangerous_code=True)
+            agent = create_csv_agent(llm, output_csv, verbose=True, allow_dangerous_code=True)
             answer = agent.run(question)
-
             return JsonResponse({"text": answer})
 
         prompt_template = PromptTemplate(
