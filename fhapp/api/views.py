@@ -79,7 +79,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             data = pd.read_excel(DataSource.objects.latest('uploaded_at').file, engine='openpyxl')
             data.to_csv(output_csv, index=False)
             agent = create_csv_agent(llm, 
-                                   '/content/excel_file_example.csv', 
+                                   '/home/ec2-user/fhbot/cur_csvfile.csv', 
                verbose=True)
             answer = agent.run(question)
 
