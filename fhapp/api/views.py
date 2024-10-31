@@ -13,6 +13,7 @@ from rest_framework import status
 from django.conf import settings
 import tempfile
 import logging
+import pandas as pd
 
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain import PromptTemplate, LLMChain
