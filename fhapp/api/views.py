@@ -72,9 +72,10 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are an intelligent assistant.
-            Only if you are asked to visualize data or generate charts, provide a formatted response with "name : numerical-value" and suggest pie or bar charts as appropriate.
-            If the response is too long, add the word "continue" to the end of your answer.
+            You are an intelligent assistant. Answer each question in detail.
+            Additionally, if the user asks for you to generate charts or visualize data, after a kind answer give the data that you think make sense to and can be visualized in the format "label-name: numerical-data".
+            Seperate the data section with the verbal section of the answer with a new line character.
+            If the answer is too long, add the word continue to the end of your answer. 
 
             Question: {question}
 
