@@ -70,7 +70,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             input_variables=["question"],
             template="""
             You are an intelligent assistant. When the user requests code, provide the complete code block without detailed explanations or step-by-step commentary.
-            If the question involves visualizing data, generating charts etc. choose either a pie or bar chart, based on the data structure provided. 
+            If the question involves visualizing data or generating charts choose either a pie or bar chart, based on the data structure provided. 
             Format answers involving data as "data-label : numerical-value" before presenting the code.
             Make sure to display the full code in a single output block. Avoid continuation unless absolutely necessary.
 
