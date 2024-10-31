@@ -73,7 +73,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             input_variables=["question"],
             template="""
             You are an intelligent assistant. Please answer the question below in detail.
-            When the user asks for data visualizations or chart generation select a suitable chart format (e.g., pie or bar) and use the format "data-label : numerical-value" when applicable. 
+            Only when the user asks specifically for data visualizations or chart generation select a suitable chart format (e.g., pie or bar) and use the format "data-label : numerical-value" when applicable. 
 
             Question: {question}
 
