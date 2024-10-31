@@ -73,9 +73,6 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             input_variables=["question"],
             template="""
             You are an intelligent assistant. Answer each question in detail.
-            Additionally, if the user asks for you to generate charts or visualize data, after a kind answer give the data that you think make sense to and can be visualized in the format "label-name: numerical-data".
-            Seperate the data section with the verbal section of the answer with a new line character.
-            If you do not know the answer, say so and do not give a blank answer.
 
             Question: {question}
 
