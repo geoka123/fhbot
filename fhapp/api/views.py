@@ -11,6 +11,10 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from django.conf import settings
+from langchain.agents import create_csv_agent
+import openpyxl
+from langchain.document_loaders.csv_loader import CSVLoader
+
 import tempfile
 import logging
 import pandas as pd
@@ -63,12 +67,23 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         """Receives input and query and returns answer based ONLY on input text provided."""
         data = request.data
         question = data.get('input')
+        context_file = str(data.get('file'))
+        context = ""
+        output_csv = r'/home/ec2-user/fhbot/cur_csvfile.csv'
+        repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
+        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=10000, temperature=1.0, token="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")
 
         if not question:
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
+        if context_file == "1":
+            data = pd.read_excel(DataSource.objects.latest('uploaded_at').file, engine='openpyxl')
+            data.to_csv(output_csv, index=False)
+            agent = create_csv_agent(llm, 
+                                   '/content/excel_file_example.csv', 
+               verbose=True)
+            answer = agent.run(question)
 
-        repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, max_length=10000, temperature=1.0, token="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")
+            return JsonResponse({"text": answer})
 
         prompt_template = PromptTemplate(
             input_variables=["question"],
