@@ -81,28 +81,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         )
         llm_chain = LLMChain(llm=llm, prompt=prompt_template)
 
-        # Attempt to get a non-blank response with a retry mechanism
-        complete_answer = ""
-        retries = 3
-        attempt = 0
+        input_data = {"question": question}
+        result = llm_chain.invoke(input_data)
 
-        while attempt < retries:
-            input_data = {"question": f"{question} {complete_answer}" if complete_answer else question}
-            result = llm_chain.invoke(input_data)
-
-            # Check for a blank response and retry if necessary
-            partial_answer = result.get("text", "").strip()
-            if partial_answer:
-                complete_answer += partial_answer
-                if "continue" not in partial_answer.lower():
-                    break  # Exit loop if response is complete
-            else:
-                logger.warning("Received a blank response, retrying...")
-                attempt += 1
-        
-        # Final check if no valid response was obtained
-        if not complete_answer:
-            logger.error("Failed to obtain a non-blank response after retries.")
-            return JsonResponse({"error": "The assistant failed to provide a response. Please try again later."}, status=500)
-
-        return JsonResponse({"question": question, "answer": complete_answer})
+        return JsonResponse({"answer": result})
