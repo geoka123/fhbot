@@ -79,7 +79,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         if context_file == "1":
             data = pd.read_excel(DataSource.objects.latest('uploaded_at').file, engine='openpyxl')
             data.to_csv(output_csv, index=False)
-            agent = create_csv_agent(OpenAI(), output_csv, verbose=True, allow_dangerous_code=True)
+            agent = create_csv_agent(llm, output_csv, verbose=True, allow_dangerous_code=True)
             answer = agent.invoke(question)
             return JsonResponse({"text": answer})
 
