@@ -73,7 +73,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             input_variables=["question"],
             template="""
             You are an intelligent assistant.
-            When asked to visualize data, provide a formatted response with "data-label : numerical-value" and suggest pie or bar charts as appropriate.
+            When asked to visualize data, provide a formatted response with "label : numerical-value" and suggest pie or bar charts as appropriate.
             If the response is too long, continue from where it was cut off in a follow-up response.
 
             Question: {question}
