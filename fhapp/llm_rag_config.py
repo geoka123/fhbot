@@ -113,8 +113,7 @@ def query_engine_init():
     )
 
 def chat(input_question):
-    global query_engine
-
+    
     response = query_engine.query(input_question)
     logging.info("response from llm - %s", response)
 
