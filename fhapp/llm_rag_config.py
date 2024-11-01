@@ -145,3 +145,5 @@ def chat(input_question):
     prompt = PromptTemplate.from_template(template)
 
     chain=prompt|gpu_llm
+
+    return chain.invoke(input_question)
