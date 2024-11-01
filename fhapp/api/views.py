@@ -124,6 +124,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             qdrant_client = QdrantClient(
                 url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333", 
                 api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
+                prefer_grpc=True,
             )
 
             vector_store = QdrantVectorStore(client=qdrant_client, collection_name="fh_data")
