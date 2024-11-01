@@ -3,6 +3,37 @@ from django.contrib.auth.models import AbstractUser
 
 import random
 
+from rest_framework.decorators import api_view, action
+from rest_framework import viewsets, generics
+from rest_framework.response import Response
+from rest_framework import status
+
+from django.conf import settings
+from langchain_experimental.agents import create_csv_agent
+import openpyxl
+from langchain.document_loaders.csv_loader import CSVLoader
+
+import tempfile
+import logging
+import pandas as pd
+from langchain_openai import OpenAI
+
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain import PromptTemplate, LLMChain
+
+from llama_parse import LlamaParse
+from llama_index.core import SimpleDirectoryReader
+
+from llama_index.llms.groq import Groq
+from llama_index.core import Settings
+from llama_index.embeddings.fastembed import FastEmbedEmbedding
+
+from qdrant_client import QdrantClient
+
+from llama_index.vector_stores.qdrant import QdrantVectorStore
+from llama_index.core import StorageContext
+from llama_index.core.indices.vector_store.base import VectorStoreIndex
+
 # Create your models here.
 
 class Bot(models.Model):
@@ -45,6 +76,35 @@ class DataSource(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name="data_sources")
     file = models.FileField(upload_to="data_sources/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        parser = LlamaParse(
+            api_key=('llx-MHkv4e22IpbbRBvnKRaPZTWXbuVQpozhfmypYJrpSTyEBjcJ'),
+            parsing_instruction = f"""You are an agent that takes an excel file that contains the application data of startups to an accelerator program. Each row corresponds to an application. Give detailed answers based on these applications.""",
+            result_type="markdown"
+        )
+
+        file_extractor = {".xlsx": parser}
+        documents = SimpleDirectoryReader(input_files=['/home/ec2-user/fhbot/media/data_sources/Application_Database.xlsx'], file_extractor=file_extractor).load_data()
+
+        llm = Groq(model="llama3-70b-8192", api_key='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')
+        Settings.llm = llm
+
+
+        embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
+        Settings.embed_model = embed_model
+
+        qdrant_client = QdrantClient(
+            url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333", 
+            api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
+        )
+
+        vector_store = QdrantVectorStore(client=qdrant_client, collection_name="fh_data")
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+        # Create vector store index and store it in Qdrant DB
+        VectorStoreIndex.from_documents(documents, storage_context=storage_context)
+
 
     def __str__(self):
         return f"{self.bot.botName} - Data Source ({self.uploaded_at.date()})"
