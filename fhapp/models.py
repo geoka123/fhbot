@@ -3,19 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 import random
 
-from llama_parse import LlamaParse
-from llama_index.core import SimpleDirectoryReader
-
-from llama_index.llms.groq import Groq
-from llama_index.core import Settings
-from llama_index.embeddings.fastembed import FastEmbedEmbedding
-
-from qdrant_client import QdrantClient
-
-from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.core import StorageContext
-from llama_index.core.indices.vector_store.base import VectorStoreIndex
-
 # Create your models here.
 
 class Bot(models.Model):
