@@ -107,8 +107,8 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         llm = HuggingFaceEndpoint(
             repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-            temperature=0.7,
-            max_new_tokens=2048,
+            temperature=1.0,
+            max_new_tokens=3000,
             huggingfacehub_api_token="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"
         )
 
