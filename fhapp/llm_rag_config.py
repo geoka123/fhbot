@@ -2,34 +2,20 @@ import chromadb
 import logging
 import sys
 
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
-from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.core import (Settings, VectorStoreIndex, SimpleDirectoryReader, PromptTemplate, Document)
-from llama_index.core import StorageContext, ServiceContext
-from llama_index.core.node_parser import SentenceWindowNodeParser
-from llama_index.core.indices.postprocessor import MetadataReplacementPostProcessor
-from llama_index.core.indices.postprocessor import SentenceTransformerRerank
-from llama_parse import LlamaParse
-from qdrant_client import QdrantClient
-from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.llms.openai import OpenAI
+from langchain_huggingface import HuggingFaceEndpoint
+from langchain_core.prompts import PromptTemplate
+from langchain import LLMChain
 
-from langchain_huggingface import HuggingFacePipeline
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+# def actual_llm_init():
+#     global model
+#     global tokenizer
 
-import logging
-import sys
-
-def actual_llm_init():
-    global model
-    global tokenizer
-
-    try:
-        model_id="gpt2"
-        model=AutoModelForCausalLM.from_pretrained(model_id)
-        tokenizer=AutoTokenizer.from_pretrained(model_id)
-    except Exception as e:
-        raise ValueError(f"Smth went wrong {e}")
+#     try:
+#         model_id="gpt2"
+#         model=AutoModelForCausalLM.from_pretrained(model_id)
+#         tokenizer=AutoTokenizer.from_pretrained(model_id)
+#     except Exception as e:
+#         raise ValueError(f"Smth went wrong {e}")
 
 # def llm_init():
 #     llm = HuggingFaceEndpoint(
@@ -128,26 +114,14 @@ def actual_llm_init():
 
 def chat(input_question):
     try:
-        pipe=pipeline("text-generation",model=model,tokenizer=tokenizer,max_new_tokens=100)
-        hf=HuggingFacePipeline(pipeline=pipe)
+        repo_id="mistralai/Mistral-7B-Instruct-v0.2"
+        llm=HuggingFaceEndpoint(repo_id=repo_id,max_length=128,temperature=0.7,token="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")
 
-        gpu_llm = HuggingFacePipeline.from_model_id(
-            model_id="gpt2",
-            task="text-generation",
-            device_map="auto",  # replace with device_map="auto" to use the accelerate library.
-            pipeline_kwargs={"max_new_tokens": 100},
-        )
-
-        # llm_chain = LLMChain(llm=llm, prompt=prompt_template)
-        # input_data = {"question": question}
-        
         template = """Question: {question}
+        Answer: Let's think step by step."""
+        prompt = PromptTemplate(template=template, input_variables=["question"])
+        llm_chain=LLMChain(llm=llm,prompt=prompt)
 
-        Answer:"""
-        prompt = PromptTemplate.from_template(template)
-
-        chain=prompt|gpu_llm
-
-        return chain.invoke(input_question)
+        print(llm_chain.invoke(input_question))
     except Exception as e:
         raise ValueError(f"Smth went wrong {e}")

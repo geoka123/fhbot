@@ -31,4 +31,4 @@ if settings.DEBUG:
 # llm_init()
 # index_init()
 # query_engine_init()
-actual_llm_init()
+# actual_llm_init()
