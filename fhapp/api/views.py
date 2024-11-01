@@ -97,7 +97,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             )
 
             file_extractor = {".xlsx": parser}
-            documents = SimpleDirectoryReader(input_files=[DataSource.objects.latest('uploaded_at')], file_extractor=file_extractor).load_data()
+            documents = SimpleDirectoryReader(input_files=['/home/ec2-user/fhbot/media/data_sources/Application_Database.xlsx'], file_extractor=file_extractor).load_data()
 
             llm = Groq(model="llama3-70b-8192", api_key='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')
             Settings.llm = llm
