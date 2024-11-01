@@ -87,6 +87,8 @@ class DataSource(models.Model):
         # Create vector store index and store it in Qdrant DB
         VectorStoreIndex.from_documents(documents, storage_context=storage_context)
 
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return f"{self.bot.botName} - Data Source ({self.uploaded_at.date()})"
