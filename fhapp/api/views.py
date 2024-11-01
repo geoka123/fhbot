@@ -4,7 +4,7 @@ import requests
 from rest_framework.views import APIView
 from ..models import *
 from .serializers import *
-from ..llm_rag_config import chat, chat_with_file
+from ..llm_rag_config import chat
 
 from rest_framework.decorators import api_view, action
 from rest_framework import viewsets, generics
@@ -94,7 +94,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
 
         if context_file == "1":
-            return JsonResponse({"text": f"{chat_with_file(question)}"})
+            return JsonResponse({"text": f"{chat(question)}"})
         
         # prompt_template = PromptTemplate(
         #     input_variables=["question"],
