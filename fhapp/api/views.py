@@ -97,7 +97,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
-            You are a knowledgeable assistant that provides concise, accurate, and well-formatted answers.
+            You are an intelligent assistant. Answer to the following question in detail.
 
             Question: {question}
 
@@ -107,7 +107,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
 
         llm = HuggingFaceEndpoint(
             repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-            temperature=1.0,
+            temperature=0.7,
             max_new_tokens=2048,
             huggingfacehub_api_token="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"
         )
