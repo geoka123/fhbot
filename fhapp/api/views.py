@@ -14,6 +14,8 @@ from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.decorators import renderer_classes
 
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
 from django.conf import settings
 from langchain_experimental.agents import create_csv_agent
 import openpyxl
@@ -24,7 +26,7 @@ import logging
 import pandas as pd
 from langchain_openai import OpenAI
 
-from langchain_huggingface import HuggingFaceEndpoint
+from langchain_huggingface import HuggingFaceEndpoint, HuggingFacePipeline
 from langchain import PromptTemplate, LLMChain
 
 from llama_parse import LlamaParse
@@ -105,19 +107,31 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         #     """
         # )
 
-        llm = HuggingFaceEndpoint(
-            repo_id="mistralai/Mistral-7B-Instruct-v0.3",
-            temperature=1.0,
-            max_new_tokens=3000,
-            max_length = 2048,
-            huggingfacehub_api_token="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"
+        model_id="gpt2"
+        model=AutoModelForCausalLM.from_pretrained(model_id)
+        tokenizer=AutoTokenizer.from_pretrained(model_id)
+
+        pipe=pipeline("text-generation",model=model,tokenizer=tokenizer,max_new_tokens=100)
+        hf=HuggingFacePipeline(pipeline=pipe)
+
+        gpu_llm = HuggingFacePipeline.from_model_id(
+            model_id="gpt2",
+            task="text-generation",
+            device_map="auto",  # replace with device_map="auto" to use the accelerate library.
+            pipeline_kwargs={"max_new_tokens": 100},
         )
 
         # llm_chain = LLMChain(llm=llm, prompt=prompt_template)
         # input_data = {"question": question}
         
+        template = """Question: {question}
+
+        Answer:"""
+        prompt = PromptTemplate.from_template(template)
+
+        chain=prompt|gpu_llm
+
         try:
-            result = llm.invoke(question)
-            return JsonResponse(result)
+            return JsonResponse({"text": chain.invoke(question)})
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
