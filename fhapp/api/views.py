@@ -104,7 +104,15 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             Answer:
             """
         )
-        llm_chain = LLMChain(llm=RespondBasedOnTextProvided.llm, prompt=prompt_template)
+
+        llm = HuggingFaceEndpoint(
+            repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+            temperature=1.0,
+            max_new_tokens=2048,
+            huggingfacehub_api_token="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"
+        )
+
+        llm_chain = LLMChain(llm=llm, prompt=prompt_template)
         input_data = {"question": question}
         
         try:
