@@ -6,6 +6,11 @@ from langchain_huggingface import HuggingFaceEndpoint
 from langchain_core.prompts import PromptTemplate
 from langchain import LLMChain
 
+from llama_parse import LlamaParse
+from llama_index.core import Settings, VectorStoreIndex
+
+api_key = 'llx-MHkv4e22IpbbRBvnKRaPZTWXbuVQpozhfmypYJrpSTyEBjcJ'
+
 # def actual_llm_init():
 #     global model
 #     global tokenizer
@@ -123,5 +128,21 @@ def chat(input_question):
         llm_chain=LLMChain(llm=llm,prompt=prompt)
 
         return(llm_chain.invoke(input_question))
+    except Exception as e:
+        raise ValueError(f"Smth went wrong {e}")
+    
+def chat_with_file(input_question):
+    try:
+        parser = LlamaParse(api_key=api_key, result_type="markdown")
+        documents = parser.load_data('/home/ec2-user/fhbot/media/data_sources/Application_Database.xlsx')
+
+        repo_id="mistralai/Mistral-7B-Instruct-v0.2"
+        llm=HuggingFaceEndpoint(repo_id=repo_id,max_length=128,temperature=0.7,token="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")
+
+        Settings.llm = llm
+        index = VectorStoreIndex.from_documents(documents)
+        query_engine = index.as_query_engine()
+
+        return (query_engine.query(input_question))
     except Exception as e:
         raise ValueError(f"Smth went wrong {e}")
