@@ -5,7 +5,7 @@ class FhappConfig(AppConfig):
     name = 'fhapp'
 
 class MyAppConfig(AppConfig):
-    name = 'init_llm'
+    name = 'fhapp'
 
     def ready(self):
         # Import and call your custom functions here
