@@ -24,9 +24,12 @@ def actual_llm_init():
     global model
     global tokenizer
 
-    model_id="gpt2"
-    model=AutoModelForCausalLM.from_pretrained(model_id)
-    tokenizer=AutoTokenizer.from_pretrained(model_id)
+    try:
+        model_id="gpt2"
+        model=AutoModelForCausalLM.from_pretrained(model_id)
+        tokenizer=AutoTokenizer.from_pretrained(model_id)
+    except Exception as e:
+        raise ValueError(f"Smth went wrong {e}")
 
 def llm_init():
     llm = HuggingFaceEndpoint(
