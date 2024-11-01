@@ -122,6 +122,6 @@ def chat(input_question):
         prompt = PromptTemplate(template=template, input_variables=["question"])
         llm_chain=LLMChain(llm=llm,prompt=prompt)
 
-        print(llm_chain.invoke(input_question))
+        return(llm_chain.invoke(input_question))
     except Exception as e:
         raise ValueError(f"Smth went wrong {e}")

@@ -108,6 +108,6 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         # )
 
         try:
-            return JsonResponse({"text": chat(question)})
+            return JsonResponse(chat(question))
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
