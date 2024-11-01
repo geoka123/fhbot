@@ -82,9 +82,14 @@ class FileUploadView(viewsets.ModelViewSet):
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
 class RespondBasedOnTextProvided(viewsets.ModelViewSet):    
+
+    model_id="gpt2"
+    model=AutoModelForCausalLM.from_pretrained(model_id)
+    tokenizer=AutoTokenizer.from_pretrained(model_id)
+
     @api_view(['POST'])
     @renderer_classes([JSONRenderer])
-    def answer_based_on_text_provided(request):
+    def answer_based_on_text_provided(self, request):
         """Handles answering questions based on input and context file if provided."""
         data = request.data
         question = data.get('input')
@@ -107,11 +112,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         #     """
         # )
 
-        model_id="gpt2"
-        model=AutoModelForCausalLM.from_pretrained(model_id)
-        tokenizer=AutoTokenizer.from_pretrained(model_id)
-
-        pipe=pipeline("text-generation",model=model,tokenizer=tokenizer,max_new_tokens=100)
+        pipe=pipeline("text-generation",model=self.model,tokenizer=self.tokenizer,max_new_tokens=100)
         hf=HuggingFacePipeline(pipeline=pipe)
 
         gpu_llm = HuggingFacePipeline.from_model_id(
