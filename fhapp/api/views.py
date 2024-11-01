@@ -71,6 +71,32 @@ class FileUploadView(viewsets.ModelViewSet):
         serializer = FileUploadSerializer(data=file_to_upload)
 
         if serializer.is_valid():
+            parser = LlamaParse(
+                api_key=('llx-MHkv4e22IpbbRBvnKRaPZTWXbuVQpozhfmypYJrpSTyEBjcJ'),
+                parsing_instruction = f"""You are an agent that takes an excel file that contains the application data of startups to an accelerator program. Each row corresponds to an application. Give detailed answers based on these applications.""",
+                result_type="markdown"
+            )
+
+            file_extractor = {".xlsx": parser}
+            documents = SimpleDirectoryReader(input_files=['/home/ec2-user/fhbot/media/data_sources/Application_Database.xlsx'], file_extractor=file_extractor).load_data()
+
+            llm = Groq(model="llama3-70b-8192", api_key='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')
+            Settings.llm = llm
+
+
+            embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
+            Settings.embed_model = embed_model
+
+            qdrant_client = QdrantClient(
+                url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333", 
+                api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
+            )
+
+            vector_store = QdrantVectorStore(client=qdrant_client, collection_name="fh_data")
+            storage_context = StorageContext.from_defaults(vector_store=vector_store)
+
+            # Create vector store index and store it in Qdrant DB
+            VectorStoreIndex.from_documents(documents, storage_context=storage_context)
             serializer.save()
             return Response({"success": "Yes"}, status=status.HTTP_201_CREATED)
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
