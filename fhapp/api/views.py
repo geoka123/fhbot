@@ -10,6 +10,9 @@ from rest_framework import viewsets, generics
 from rest_framework.response import Response
 from rest_framework import status
 
+from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import renderer_classes
+
 from django.conf import settings
 from langchain_experimental.agents import create_csv_agent
 import openpyxl
@@ -103,6 +106,7 @@ class FileUploadView(viewsets.ModelViewSet):
 
 class RespondBasedOnTextProvided(viewsets.ModelViewSet):
     @api_view(['POST'])
+    @renderer_classes([JSONRenderer])
     def answer_based_on_text_provided(request):
         """Receives input and query and returns answer based ONLY on input text provided."""
         data = request.data
