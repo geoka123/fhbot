@@ -105,40 +105,38 @@ class FileUploadView(viewsets.ModelViewSet):
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
 class RespondBasedOnTextProvided(viewsets.ModelViewSet):
+    llm = HuggingFaceEndpoint(
+        repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+        temperature=1.0,
+        max_new_tokens=2048,
+        huggingfacehub_api_token="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"
+    )
+    
+    embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    qdrant_client = QdrantClient(
+        url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333",
+        api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
+        prefer_grpc=True
+    )
+    vector_store = QdrantVectorStore(client=qdrant_client, collection_name="fh_data")
+    db_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+    
     @api_view(['POST'])
     @renderer_classes([JSONRenderer])
     def answer_based_on_text_provided(request):
-        """Receives input and query and returns answer based ONLY on input text provided."""
+        """Handles answering questions based on input and context file if provided."""
         data = request.data
         question = data.get('input')
         context_file = str(data.get('file'))
-        context = ""
-        output_csv = r'/home/ec2-user/fhbot/cur_csvfile.csv'
-        repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-        llm = HuggingFaceEndpoint(repo_id=repo_id, temperature=1.0, max_new_tokens=2048, huggingfacehub_api_token="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")
-
+        
         if not question:
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
+
         if context_file == "1":
-
-            embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
-            Settings.embed_model = embed_model
-
-            qdrant_client = QdrantClient(
-                url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333", 
-                api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
-                prefer_grpc=True,
-            )
-
-            vector_store = QdrantVectorStore(client=qdrant_client, collection_name="fh_data")
-            db_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-
-            # create a query engine for the index
-            query_engine = db_index.as_query_engine()
+            query_engine = RespondBasedOnTextProvided.db_index.as_query_engine()
             response = query_engine.query(question)
             return JsonResponse({"text": f"{response}"})
-
-
+        
         prompt_template = PromptTemplate(
             input_variables=["question"],
             template="""
@@ -152,9 +150,11 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             Answer:
             """
         )
-        llm_chain = LLMChain(llm=llm, prompt=prompt_template)
-
+        llm_chain = LLMChain(llm=RespondBasedOnTextProvided.llm, prompt=prompt_template)
         input_data = {"question": question}
-        result = llm_chain.invoke(input_data)
-
-        return JsonResponse(result)
+        
+        try:
+            result = llm_chain.invoke(input_data)
+            return JsonResponse(result)
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
