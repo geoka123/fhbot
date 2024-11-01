@@ -1,1 +1,1 @@
-default_app_config = 'fhapp.apps.MyAppConfig'
+# default_app_config = 'fhapp.apps.MyAppConfig'
