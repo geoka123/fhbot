@@ -94,29 +94,30 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         if context_file == "1":
             return JsonResponse({"text": f"{chat(question)}"})
         
-        prompt_template = PromptTemplate(
-            input_variables=["question"],
-            template="""
-            You are an intelligent assistant. Answer to the following question in detail.
+        # prompt_template = PromptTemplate(
+        #     input_variables=["question"],
+        #     template="""
+        #     You are an intelligent assistant. Answer to the following question in detail.
 
-            Question: {question}
+        #     Question: {question}
 
-            Answer:
-            """
-        )
+        #     Answer:
+        #     """
+        # )
 
         llm = HuggingFaceEndpoint(
             repo_id="mistralai/Mistral-7B-Instruct-v0.3",
             temperature=1.0,
             max_new_tokens=3000,
+            max_length = 2048,
             huggingfacehub_api_token="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"
         )
 
-        llm_chain = LLMChain(llm=llm, prompt=prompt_template)
-        input_data = {"question": question}
+        # llm_chain = LLMChain(llm=llm, prompt=prompt_template)
+        # input_data = {"question": question}
         
         try:
-            result = llm_chain.invoke(input_data)
+            result = llm.invoke(question)
             return JsonResponse(result)
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
