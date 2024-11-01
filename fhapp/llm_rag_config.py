@@ -14,8 +14,20 @@ from qdrant_client import QdrantClient
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from llama_index.llms.openai import OpenAI
 
+from langchain_huggingface import HuggingFacePipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
 import logging
 import sys
+
+def actual_llm_init():
+    global model
+    global tokenizer
+
+    
+    model_id="gpt2"
+    model=AutoModelForCausalLM.from_pretrained(model_id)
+    tokenizer=AutoTokenizer.from_pretrained(model_id)
 
 def llm_init():
     llm = HuggingFaceEndpoint(
@@ -113,12 +125,23 @@ def query_engine_init():
     )
 
 def chat(input_question):
+
+    pipe=pipeline("text-generation",model=model,tokenizer=tokenizer,max_new_tokens=100)
+    hf=HuggingFacePipeline(pipeline=pipe)
+
+    gpu_llm = HuggingFacePipeline.from_model_id(
+        model_id="gpt2",
+        task="text-generation",
+        device_map="auto",  # replace with device_map="auto" to use the accelerate library.
+        pipeline_kwargs={"max_new_tokens": 100},
+    )
+
+    # llm_chain = LLMChain(llm=llm, prompt=prompt_template)
+    # input_data = {"question": question}
     
-    response = query_engine.query(input_question)
-    logging.info("response from llm - %s", response)
+    template = """Question: {question}
 
-    # view sentece window retrieval window and origianl text
-    logging.info("sentence window retrieval window - %s", response.source_nodes[0].node.metadata["window"])
-    logging.info("sentence window retrieval orginal_text - %s", response.source_nodes[0].node.metadata["original_text"])
+    Answer:"""
+    prompt = PromptTemplate.from_template(template)
 
-    return response.response
+    chain=prompt|gpu_llm

@@ -82,14 +82,9 @@ class FileUploadView(viewsets.ModelViewSet):
         return Response({"success": "No"}, status=status.HTTP_400_BAD_REQUEST)
 
 class RespondBasedOnTextProvided(viewsets.ModelViewSet):    
-
-    model_id="gpt2"
-    model=AutoModelForCausalLM.from_pretrained(model_id)
-    tokenizer=AutoTokenizer.from_pretrained(model_id)
-
     @api_view(['POST'])
     @renderer_classes([JSONRenderer])
-    def answer_based_on_text_provided(self, request):
+    def answer_based_on_text_provided(request):
         """Handles answering questions based on input and context file if provided."""
         data = request.data
         question = data.get('input')
@@ -112,27 +107,7 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
         #     """
         # )
 
-        pipe=pipeline("text-generation",model=self.model,tokenizer=self.tokenizer,max_new_tokens=100)
-        hf=HuggingFacePipeline(pipeline=pipe)
-
-        gpu_llm = HuggingFacePipeline.from_model_id(
-            model_id="gpt2",
-            task="text-generation",
-            device_map="auto",  # replace with device_map="auto" to use the accelerate library.
-            pipeline_kwargs={"max_new_tokens": 100},
-        )
-
-        # llm_chain = LLMChain(llm=llm, prompt=prompt_template)
-        # input_data = {"question": question}
-        
-        template = """Question: {question}
-
-        Answer:"""
-        prompt = PromptTemplate.from_template(template)
-
-        chain=prompt|gpu_llm
-
         try:
-            return JsonResponse({"text": chain.invoke(question)})
+            return JsonResponse({"text": chat(question)})
         except Exception as e:
             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)

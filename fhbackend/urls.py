@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from fhapp.llm_rag_config import llm_init, index_init, query_engine_init
+from fhapp.llm_rag_config import llm_init, index_init, query_engine_init, actual_llm_init
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,3 +31,4 @@ if settings.DEBUG:
 # llm_init()
 # index_init()
 # query_engine_init()
+actual_llm_init()
