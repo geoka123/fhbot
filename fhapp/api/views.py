@@ -121,6 +121,9 @@ class RespondBasedOnTextProvided(viewsets.ModelViewSet):
             return Response({"error": "Both 'input' and 'query' are required"}, status=400)
         if context_file == "1":
 
+            embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
+            Settings.embed_model = embed_model
+
             qdrant_client = QdrantClient(
                 url="https://bff3be45-6a0e-4931-83be-d93c2810171d.us-east4-0.gcp.cloud.qdrant.io:6333", 
                 api_key="Pyq_lqp0G9xhTIWiwidSv3evxN98jix72qUjBnFPP8VNKiClwKsTIw",
